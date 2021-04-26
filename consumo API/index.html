@@ -6,10 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lojas de Games</title>
 
-    <link rel="stylesheet" href="../css/style.css">
-    
 </head>
 <body>
+
+    <h2>Login</h2>
+    <input type="text" id="email" name="login" placeholder='Email: '> <br>
+    <input type="password" name='password' id="password" placeholder="Senha: "> <br>
+    <button onclick="login()">Entrar</button>
 
     <hr>
     <h4>Lista de games</h4>
@@ -36,12 +39,39 @@
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
- 
 
     <!--Listando Games da api no front-end -->
+
     <script>
 
-        axios.get("http://localhost:8081/games").then(res =>{
+         //Autorização JWT
+         let axiosConfig = {
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("token")
+            }
+        }
+
+        function login(){
+            let emailField = document.getElementById("email");
+            let passwordField = document.getElementById("password");
+
+            let email = emailField.value;
+            let password = passwordField.value;
+
+            axios.post("http://localhost:8081/auth",{
+                email, 
+                password
+            }).then(res =>{
+                alert("Success!")
+                let token = res.data.token;
+                axiosConfig.headers.Authorization = "Bearer " + localStorage.getItem("token");
+                localStorage.setItem("token", token);
+            }).catch(error =>{
+                alert("Error! Login Invalido")
+            })
+        }
+
+        axios.get("http://localhost:8081/games", axiosConfig).then(res =>{
             let games = res.data;
             let list = document.getElementById("games");
 
@@ -96,7 +126,7 @@
                 year: yearInput.value,
                 price: priceInput.value
             }
-            axios.post("http://localhost:8081/game", game).then(res =>{
+            axios.post("http://localhost:8081/game", game, axiosConfig).then(res =>{
                 if(res.status == 200){
                     alert("Game Cadastrado!")
                 }
@@ -112,7 +142,7 @@
         
         function deleteGame(listItem){
             let id = listItem.getAttribute("data-id");
-            axios.delete("http://localhost:8081/games/"+id).then(response =>{
+            axios.delete("http://localhost:8081/games/"+id, axiosConfig).then(response =>{
                 alert("Deletado!")
             }).catch(err => {
                 alert(err)
@@ -149,7 +179,7 @@
 
             let id = idInput.value;
 
-            axios.put("http://localhost:8081/games/"+id,game).then(res =>{
+            axios.put("http://localhost:8081/games/"+id,game, axiosConfig).then(res =>{
                 if(res.status == 200){
                     alert("Game Atualizado!")
                 }
