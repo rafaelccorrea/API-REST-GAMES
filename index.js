@@ -13,7 +13,6 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-
 //middleware autenticação de token
 function auth(req, res, next) {
     const authToken = req.headers['authorization'];
@@ -21,7 +20,6 @@ function auth(req, res, next) {
         //Dividindo o token e pegando somente o token
         const bearer = authToken.split(' ');
         const token = bearer[1];
-
         jwt.verify(token, Secret, (err, data)=>{
             if(err){
                 res.status(401);
@@ -38,7 +36,6 @@ function auth(req, res, next) {
     }
 }
 
-
 //Banco de dados Fake.
 let DB = {
     games:[
@@ -53,7 +50,6 @@ let DB = {
             title: "God Od War",
             year: 2020,
             price: 40
-
         },   
         {
             id:2,
@@ -62,16 +58,13 @@ let DB = {
             price: 80
         }
     ],
-
     users: [
-
         {
             id:3,
             name: "rafael correa",
             email: "rafael@gmail.com",
             password: "123",
         },
-
         {
             id:4,
             name: "Yuri Correa",
@@ -83,7 +76,6 @@ let DB = {
 }
 
 //Usuario geração de Token
-
 app.post('/auth', (req,res)=>{
 
     let {email, password} = req.body;
@@ -122,12 +114,13 @@ app.post('/auth', (req,res)=>{
 })
 
 
-//Listando todos os dados da API
+//Rota com middleware Listando games
 app.get('/games',auth,(req,res) => {
     res.statusCode = 200;
     res.json(DB.games);
 })
 
+//Listando dados da API
 //Pesquisar Por ID
 app.get('/games/:id', (req,res) => {
     let id = req.params.id;
@@ -137,7 +130,6 @@ app.get('/games/:id', (req,res) => {
     }else{
         
         let id = parseInt(req.params.id);
-        
         let games = DB.games.find(g => g.id == id);
 
         if(games != undefined){
@@ -150,8 +142,7 @@ app.get('/games/:id', (req,res) => {
 })
 
 //Cadastro de dados da api
-
-app.post("/game", (req,res) => {
+app.post("/game", auth,(req,res) => {
 
     //Desestruturacao
 
@@ -166,10 +157,9 @@ app.post("/game", (req,res) => {
     res.sendStatus(200);
 })
 
-
 //Deletando Dados da Api
 
-app.delete("/games/:id", (req,res)=>{
+app.delete("/games/:id", auth, (req,res)=>{
   
     if(isNaN(req.params.id)){
         res.sendStatus(400);
@@ -186,10 +176,9 @@ app.delete("/games/:id", (req,res)=>{
     }
 })
 
-
 //Editando dados da API 
 
-app.put('/games/:id', (req,res)=>{
+app.put('/games/:id', auth, (req,res)=>{
     
     if(isNaN(req.params.id)){
         res.sendStatus(400);
@@ -220,7 +209,6 @@ app.put('/games/:id', (req,res)=>{
         }
     }
 })
-
 
 //Config Servidor
 app.listen(8081, ()=>{
